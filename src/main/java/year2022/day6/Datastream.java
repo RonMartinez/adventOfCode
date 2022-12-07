@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class Datastream {
 	
-	public static final int PACKET_MAKER_SIZE = 4;
-	public static final int MESSAGE_MAKER_SIZE = 14;
+	public static final int PACKET_MARKER_SIZE = 4;
+	public static final int MESSAGE_MARKER_SIZE = 14;
 
 	private String datastream;
 	private List<Integer> packetMarkers;
@@ -16,8 +16,8 @@ public class Datastream {
 
 	public Datastream(String datastream) {
 		this.datastream = datastream;
-		this.packetMarkers = calculateMarkers(PACKET_MAKER_SIZE);
-		this.messageMarkers = calculateMarkers(MESSAGE_MAKER_SIZE);
+		this.packetMarkers = calculateMarkers(PACKET_MARKER_SIZE);
+		this.messageMarkers = calculateMarkers(MESSAGE_MARKER_SIZE);
 	}
 
 	protected List<Integer> calculateMarkers(int markerSize) {
