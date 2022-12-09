@@ -23,8 +23,10 @@ public class Rope {
 	}
 	
 	private void updateTail() {
-		Long xDifference = head.getCoordinate().getX() - tail.getCoordinate().getX();
-		Long yDifference = head.getCoordinate().getY() - tail.getCoordinate().getY();
+		Coordinate headCoordinate = head.getCoordinate();
+		Coordinate tailCoordinate = head.getCoordinate();
+		Long xDifference = headCoordinate.getX() - tailCoordinate.getX();
+		Long yDifference = headCoordinate.getY() - tailCoordinate.getY();
 		
 		if(Math.abs(xDifference) > 1
 				|| Math.abs(yDifference) > 1

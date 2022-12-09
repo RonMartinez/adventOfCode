@@ -35,8 +35,10 @@ public class GeneralRope {
 	}
 	
 	private void updateKnot(Knot knot, Knot previousKnot) {
-		Long xDifference = previousKnot.getCoordinate().getX() - knot.getCoordinate().getX();
-		Long yDifference = previousKnot.getCoordinate().getY() - knot.getCoordinate().getY();
+		Coordinate previousCoordinate = previousKnot.getCoordinate();
+		Coordinate coordinate = previousKnot.getCoordinate();
+		Long xDifference = previousCoordinate.getX() - coordinate.getX();
+		Long yDifference = previousCoordinate.getY() - coordinate.getY();
 		
 		if(Math.abs(xDifference) > 1
 				|| Math.abs(yDifference) > 1
