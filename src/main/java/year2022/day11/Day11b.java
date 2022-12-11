@@ -50,10 +50,10 @@ public class Day11b {
 	}
 
 	private static Long calculateMonkeyBusinessLevel(List<Monkey> mostActiveMonkeys) {
-		Long monkeyBusinessLevel = 0L;
+		Long monkeyBusinessLevel = null;
 		if( ! mostActiveMonkeys.isEmpty()) {
-			monkeyBusinessLevel = mostActiveMonkeys.get(0).getTimesInspected();
-			for(int i = 1; i < mostActiveMonkeys.size(); i++) {
+			monkeyBusinessLevel = 1L;
+			for(int i = 0; i < mostActiveMonkeys.size(); i++) {
 				monkeyBusinessLevel = monkeyBusinessLevel * mostActiveMonkeys.get(i).getTimesInspected();
 			}
 		}
@@ -71,7 +71,7 @@ public class Day11b {
 		}
 		
 		setReliefOperations(monkeyGroup);
-		//TODO could also set the true and false monkeys in the post process way
+		//TODO could also set the actual true and false monkeys in a similar post process way, rather than the indexes
 		
 		return monkeyGroup;
 	}

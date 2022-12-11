@@ -47,10 +47,10 @@ public class Day11 {
 	}
 
 	private static Long calculateMonkeyBusinessLevel(List<Monkey> mostActiveMonkeys) {
-		Long monkeyBusinessLevel = 0L;
+		Long monkeyBusinessLevel = null;
 		if( ! mostActiveMonkeys.isEmpty()) {
-			monkeyBusinessLevel = mostActiveMonkeys.get(0).getTimesInspected();
-			for(int i = 1; i < mostActiveMonkeys.size(); i++) {
+			monkeyBusinessLevel = 1L;
+			for(int i = 0; i < mostActiveMonkeys.size(); i++) {
 				monkeyBusinessLevel = monkeyBusinessLevel * mostActiveMonkeys.get(i).getTimesInspected();
 			}
 		}
