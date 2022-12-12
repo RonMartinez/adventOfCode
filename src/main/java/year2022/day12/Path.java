@@ -10,6 +10,11 @@ public class Path {
 
 	private List<Node> nodes;
 	
+	public void print() {
+		nodes.forEach(n -> System.out.print(n.getCharacter()));
+		System.out.println();
+	}
+
 	public int getSize() {
 		return getNodes().size();
 	}

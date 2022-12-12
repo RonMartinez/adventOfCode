@@ -3,8 +3,8 @@ package year2022.day12;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,8 +15,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class Day12 {
 
-	private static final String FILENAME = "src/main/resources/2022/day12InputSample.txt";
-//	private static final String FILENAME = "src/main/resources/2022/day12Input.txt";
+//	private static final String FILENAME = "src/main/resources/2022/day12InputSample.txt";
+	private static final String FILENAME = "src/main/resources/2022/day12Input.txt";
 	
 	public static final Long OFFSET = -9L;
 	public static final Character START_CHARACTER = Character.valueOf('S');
@@ -42,50 +42,59 @@ public class Day12 {
 				.filter(t -> END_CHARACTER.equals(t.getCharacter()))
 				.findFirst().orElse(null);
 		
-		List<Path> paths = new ArrayList<>();
-		Path path = new Path();
-		path.addNode(startNode);
+		Path shortestPath = findShortestPath(startNode, endNode);
 		
-		HashMap<Node, Path> visitedNodePathMap = new HashMap<>();
+		System.out.println(shortestPath.getSize()-1);	
 		
-		traverseToEndNode(startNode, endNode, path, paths, visitedNodePathMap);
-		
-		Path shortestPath = paths.stream()
-				.sorted(Path.SIZE_COMPARATOR)
-				.findFirst().orElse(null);
-		
-		shortestPath.getNodes().forEach(n -> System.out.print(n.getCharacter()));
-		System.out.println();
-		
-		System.out.println(shortestPath.getSize()-1);
 
 		System.out.println("done");
 	}
+	
+	private static Path findShortestPath(Node startNode, Node endNode) {
+		Path shortestPath = null;
+		
+		Set<Node> visited = new HashSet<>();
 
-	private static void traverseToEndNode(Node startNode, Node endNode, Path path, List<Path> paths, HashMap<Node, Path> visitedNodePathMap) {
-		if(startNode.equals(endNode)) {
-			paths.add(path);
-		} else {
-			Set<Node> traversibleNeighbourNodes = startNode.getNeighbourNodes().stream()
-					.filter(nn -> canTraverse(startNode, nn))
-					.filter(nn -> ! path.getNodes().contains(nn))
-					.collect(Collectors.toSet());
-			for(Node neighbourNode : traversibleNeighbourNodes) {
-				Path newPath = new Path();
-				path.getNodes().forEach(newPath::addNode);
-				newPath.addNode(neighbourNode);
-				
-				Path existingPath = visitedNodePathMap.get(neighbourNode);
-				
-				if(existingPath == null
-						|| newPath.getSize() < existingPath.getSize()) {
-					visitedNodePathMap.put(neighbourNode, newPath);
-					traverseToEndNode(neighbourNode, endNode, newPath, paths, visitedNodePathMap);	
+		LinkedList<Path> queue = new LinkedList<>();
+
+		Path startPath = new Path();
+		startPath.addNode(startNode);
+
+		visited.add(startNode);
+		queue.add(startPath);
+		while ( ! queue.isEmpty()) {
+			Path path = queue.poll();
+			
+			List<Node> nodes = path.getNodes();
+			
+			Node node = nodes.get(nodes.size()-1); 
+			if(node.equals(endNode)) {
+				shortestPath = path;
+			} else {
+				for(Node unvisitedTraversibleNode : getUnvisitedTraversibleNodes(node, visited)) {
+					Path copyPath = copyPath(path);
+					copyPath.addNode(unvisitedTraversibleNode);
+					
+					visited.add(unvisitedTraversibleNode);
+					queue.add(copyPath);
 				}
-				
-				
 			}
 		}
+		
+		return shortestPath;
+	}
+	
+	private static Set<Node> getUnvisitedTraversibleNodes(Node node, Set<Node> visited) {
+		return node.getNeighbourNodes().stream()
+				.filter(nn -> canTraverse(node, nn))
+				.filter(nn -> ! visited.contains(nn))
+				.collect(Collectors.toSet());
+	}
+
+	private static Path copyPath(Path path) {
+		Path copy = new Path();
+		path.getNodes().forEach(copy::addNode);
+		return copy;
 	}
 
 	private static boolean canTraverse(Node startNode, Node neighbourNode) {
