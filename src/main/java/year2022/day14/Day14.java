@@ -3,6 +3,7 @@ package year2022.day14;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,11 @@ public class Day14 {
 		for(CoordinatePath coordinatePath : coordinatePaths) {
 			processCoordinatePath(coordinatePath, cave);
 		}
+		
+		Long maxY = cave.getCoordinateMap().keySet().stream()
+				.map(c -> c.getY())
+				.max(Comparator.naturalOrder()).orElse(null);
+		cave.setMaxY(maxY);
 		
 //		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
 //			System.out.println(coordinate.getX() + "," + coordinate.getY());
