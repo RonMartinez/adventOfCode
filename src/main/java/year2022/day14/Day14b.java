@@ -16,30 +16,33 @@ public class Day14b {
 //	private static final String FILENAME = "src/main/resources/2022/day14InputSample.txt";
 	private static final String FILENAME = "src/main/resources/2022/day14Input.txt";
 	
+	public static final Coordinate ENTRY_COORDINATE = new Coordinate(500L, 0L);
+	public static final String COORDINATE_PATH_DELIMITER = " -> ";
+	public static final String COMMA = ",";
+	public static final Long FLOOR_OFFSET = 2L;
+	
 	public static void main(String[] args) throws IOException {
 		List<CoordinatePath> coordinatePaths = readCoordinatePaths();
 		
 		coordinatePaths.forEach(t -> System.out.println(ReflectionToStringBuilder.toString(t, ToStringStyle.MULTI_LINE_STYLE)));
 		
-		Cave cave = new Cave();
+		CaveWithFloor cave = new CaveWithFloor();
 		
 		for(CoordinatePath coordinatePath : coordinatePaths) {
 			processCoordinatePath(coordinatePath, cave);
 		}
+//		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
+//			System.out.println(coordinate.getX() + "," + coordinate.getY());
+//		}
 		
 		Long maxY = cave.getCoordinateMap().keySet().stream()
 				.map(c -> c.getY())
 				.max(Comparator.naturalOrder()).orElse(null);
-		cave.setMaxY(maxY + 2L);
+		cave.setMaxY(maxY + FLOOR_OFFSET);
 
-		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
-			System.out.println(coordinate.getX() + "," + coordinate.getY());
-		}
-		
-		Coordinate entryCoordinate = new Coordinate(500L, 0L);
-		Coordinate settledCoordinate = cave.dropSand(entryCoordinate);
-		while( ! settledCoordinate.equals(entryCoordinate)) {
-			settledCoordinate = cave.dropSand(entryCoordinate);
+		Coordinate settledCoordinate = cave.dropSand(ENTRY_COORDINATE);
+		while( ! settledCoordinate.equals(ENTRY_COORDINATE)) {
+			settledCoordinate = cave.dropSand(ENTRY_COORDINATE);
 		}
 		
 //		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
@@ -57,7 +60,7 @@ public class Day14b {
 		System.out.println("done");
 	}
 	
-	private static void processCoordinatePath(CoordinatePath coordinatePath, Cave cave) {
+	private static void processCoordinatePath(CoordinatePath coordinatePath, CaveWithFloor cave) {
 		List<Coordinate> coordinates = coordinatePath.getCoordinates();
 		
 		Coordinate previousCoordinate = null;
@@ -75,6 +78,7 @@ public class Day14b {
 						direction = -1;
 					}
 					
+					//there's probably a better way to parameterize the comparison, and I think I've done it in a past aoc, whatever
 					if(direction > 0) {
 						for(long newY = previousY; newY <= y; newY += direction) {
 							cave.addRock(new Coordinate(x, newY));
@@ -90,6 +94,7 @@ public class Day14b {
 						direction = -1;
 					}
 					
+					//there's probably a better way to parameterize the comparison, and I think I've done it in a past aoc, whatever
 					if(direction > 0) {
 						for(long newX = previousX; newX <= x; newX += direction) {
 							cave.addRock(new Coordinate(newX, y));
@@ -117,7 +122,7 @@ public class Day14b {
 	}
 
 	private static CoordinatePath createCoordinatePath(String line) {
-		String[] split = line.split(" -> ");
+		String[] split = line.split(COORDINATE_PATH_DELIMITER);
 		
 		CoordinatePath coordinatePath = new CoordinatePath();
 		for(String element : split) {
@@ -128,7 +133,7 @@ public class Day14b {
 	}
 
 	private static Coordinate createCoordinate(String element) {
-		String[] split = element.split(",");
+		String[] split = element.split(COMMA);
 		
 		return new Coordinate(Long.valueOf(split[0]), Long.valueOf(split[1]));
 	}

@@ -15,6 +15,10 @@ public class Day14 {
 //	private static final String FILENAME = "src/main/resources/2022/day14InputSample.txt";
 	private static final String FILENAME = "src/main/resources/2022/day14Input.txt";
 	
+	public static final Coordinate ENTRY_COORDINATE = new Coordinate(500L, 0L);
+	public static final String COORDINATE_PATH_DELIMITER = " -> ";
+	public static final String COMMA = ",";
+	
 	public static void main(String[] args) throws IOException {
 		List<CoordinatePath> coordinatePaths = readCoordinatePaths();
 		
@@ -26,13 +30,13 @@ public class Day14 {
 			processCoordinatePath(coordinatePath, cave);
 		}
 		
-		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
-			System.out.println(coordinate.getX() + "," + coordinate.getY());
-		}
+//		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
+//			System.out.println(coordinate.getX() + "," + coordinate.getY());
+//		}
 		
-		Coordinate settledCoordinate = cave.dropSand(new Coordinate(500L, 0L));
+		Coordinate settledCoordinate = cave.dropSand(ENTRY_COORDINATE);
 		while(settledCoordinate != null) {
-			settledCoordinate = cave.dropSand(new Coordinate(500L, 0L));
+			settledCoordinate = cave.dropSand(ENTRY_COORDINATE);
 		}
 		
 //		for(Coordinate coordinate : cave.getCoordinateMap().keySet()) {
@@ -68,6 +72,7 @@ public class Day14 {
 						direction = -1;
 					}
 					
+					//there's probably a better way to parameterize the comparison, and I think I've done it in a past aoc, whatever
 					if(direction > 0) {
 						for(long newY = previousY; newY <= y; newY += direction) {
 							cave.addRock(new Coordinate(x, newY));
@@ -83,6 +88,7 @@ public class Day14 {
 						direction = -1;
 					}
 					
+					//there's probably a better way to parameterize the comparison, and I think I've done it in a past aoc, whatever
 					if(direction > 0) {
 						for(long newX = previousX; newX <= x; newX += direction) {
 							cave.addRock(new Coordinate(newX, y));
@@ -110,7 +116,7 @@ public class Day14 {
 	}
 
 	private static CoordinatePath createCoordinatePath(String line) {
-		String[] split = line.split(" -> ");
+		String[] split = line.split(COORDINATE_PATH_DELIMITER);
 		
 		CoordinatePath coordinatePath = new CoordinatePath();
 		for(String element : split) {
@@ -121,7 +127,7 @@ public class Day14 {
 	}
 
 	private static Coordinate createCoordinate(String element) {
-		String[] split = element.split(",");
+		String[] split = element.split(COMMA);
 		
 		return new Coordinate(Long.valueOf(split[0]), Long.valueOf(split[1]));
 	}

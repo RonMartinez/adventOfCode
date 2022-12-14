@@ -3,13 +3,14 @@ package year2022.day14;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cave {
+public class CaveWithFloor {
 	
 	public static final String ROCK = "#";
 	public static final String SAND = "o";
 	public static final Long MAX_ITERATIONS = 2_500L;
 
 	private Map<Coordinate, String> coordinateMap;
+	private Long maxY;
 	
 	public Coordinate dropSand(Coordinate sand) {
 		Coordinate coordinate = findSettledCoordinate(sand, 0L);
@@ -33,12 +34,16 @@ public class Cave {
 			Coordinate down = new Coordinate(x, newY);
 			Coordinate downLeft = new Coordinate(x-1, newY);
 			Coordinate downRight = new Coordinate(x+1, newY);
-			if(coordinateMap.get(down) == null) {
-				coordinate = findSettledCoordinate(down, iterations+1L);
-			} else if(coordinateMap.get(downLeft) == null) {
-				coordinate = findSettledCoordinate(downLeft, iterations+1L);
-			} else if(coordinateMap.get(downRight) == null) {
-				coordinate = findSettledCoordinate(downRight, iterations+1L);
+			if(newY < maxY) {
+				if(coordinateMap.get(down) == null) {
+					coordinate = findSettledCoordinate(down, iterations+1L);
+				} else if(coordinateMap.get(downLeft) == null) {
+					coordinate = findSettledCoordinate(downLeft, iterations+1L);
+				} else if(coordinateMap.get(downRight) == null) {
+					coordinate = findSettledCoordinate(downRight, iterations+1L);
+				} else {
+					coordinate = sand;
+				}
 			} else {
 				coordinate = sand;
 			}
@@ -60,6 +65,14 @@ public class Cave {
 
 	public void setCoordinateMap(Map<Coordinate, String> coordinateMap) {
 		this.coordinateMap = coordinateMap;
+	}
+
+	public Long getMaxY() {
+		return maxY;
+	}
+
+	public void setMaxY(Long maxY) {
+		this.maxY = maxY;
 	}
 
 }
