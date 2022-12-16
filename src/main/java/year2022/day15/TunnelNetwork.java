@@ -1,10 +1,12 @@
 package year2022.day15;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,24 +45,19 @@ public class TunnelNetwork {
 	}
 	
 	public Long getCoveredCoordinateCount(long y) {
-		Long minX = Long.MAX_VALUE;
-		Long maxX = Long.MIN_VALUE;
-		for(SensorBeacon sensorBeacon : sensorBeacons) {
-			Long newMinX = sensorBeacon.getMinX(sensorBeacon);
-			if(newMinX < minX) {
-				minX = newMinX;
-			}
-
-			Long newMaxX = sensorBeacon.getMaxX(sensorBeacon);
-			if(newMaxX > maxX) {
-				maxX = newMaxX;
-			}
-		}
+		Long minX = sensorBeacons.stream()
+				.map(sb -> sb.getMinX(y))
+				.filter(Objects::nonNull)
+				.min(Comparator.naturalOrder()).orElse(null);
+		Long maxX = sensorBeacons.stream()
+				.map(sb -> sb.getMaxX(y))
+				.filter(Objects::nonNull)
+				.max(Comparator.naturalOrder()).orElse(null);
 		
-		return getCoveredCoordinateCount(y,  minX, maxX, false);
+		return getCoveredCoordinateCount(y,  minX, maxX);
 	}
 
-	public Long getCoveredCoordinateCount(long y, Long minX, Long maxX, boolean includeBeacons) {
+	public Long getCoveredCoordinateCount(long y, Long minX, Long maxX) {
 		Long count = 0L;
 		
 		Set<Coordinate> beacons = getBeacons();
@@ -68,11 +65,7 @@ public class TunnelNetwork {
 			Coordinate coordinate = new Coordinate(x, y);
 			if(sensorBeacons.stream()
 					.anyMatch(sb -> CoordinateHelper.getManhattanDistance(sb.getSensor(), coordinate) <= sb.getManhattanDistance())
-					&& (
-							includeBeacons
-							||
-							! beacons.contains(coordinate)
-							)
+					&& ! beacons.contains(coordinate)
 					) {
 				count++;
 			}

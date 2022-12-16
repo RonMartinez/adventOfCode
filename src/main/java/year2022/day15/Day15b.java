@@ -35,8 +35,8 @@ public class Day15b {
 		for(long y = MINUMUM_COORDINATE; y <= MAXIMUM_COORDINATE; y++) {
 			Set<Range<Long>> ranges = new HashSet<>();
 			for(SensorBeacon sensorBeacon : tunnelNetwork.getSensorBeacons()) {
-				Long minX = sensorBeacon.getMinX(sensorBeacon, y);
-				Long maxX = sensorBeacon.getMaxX(sensorBeacon, y);
+				Long minX = sensorBeacon.getMinX(y);
+				Long maxX = sensorBeacon.getMaxX(y);
 				if(minX != null
 						&& maxX != null
 						) {
@@ -53,19 +53,20 @@ public class Day15b {
 			List<Range<Long>> sortedRanges = ranges.stream()
 					.sorted(Comparator.comparing(Range::getMinimum))
 					.collect(Collectors.toList());
-			Long currentMaximum = null;
+			
+			Long previousMaximum = null;
 			for(Range<Long> range : sortedRanges) {
 				Long minimum = range.getMinimum();
 				Long maximum = range.getMaximum();
-				if(currentMaximum != null
-						&& minimum > currentMaximum + 1) {
+				if(previousMaximum != null
+						&& minimum > previousMaximum + 1) {
 					targetX = minimum-1;
 					break;
 				}
 				
-				if(currentMaximum == null
-						|| maximum > currentMaximum) {
-					currentMaximum = maximum;
+				if(previousMaximum == null
+						|| maximum > previousMaximum) {
+					previousMaximum = maximum;
 				}
 			}
 			if(targetX != null) {

@@ -12,58 +12,36 @@ public class SensorBeacon {
 		this.manhattanDistance = CoordinateHelper.getManhattanDistance(sensor, beacon);
 	}
 
-	public Long getMinX(SensorBeacon sensorBeacon, long y) {
+	public Long getMinX(long y) {
 		Long minX = null;
 		
-		Coordinate sensor = sensorBeacon.getSensor();
+		Coordinate sensor = getSensor();
 		Long sensorX = sensor.getX();
 		Long sensorY = sensor.getY();
 		
 		Long yDiff = Math.abs(sensorY - y);
-		long manhattanDistance = sensorBeacon.getManhattanDistance();
+		long manhattanDistance = getManhattanDistance();
 		if(yDiff <= manhattanDistance) {
-			minX = sensorX - (manhattanDistance - Math.abs(sensorY - y));
+			minX = sensorX - (manhattanDistance - yDiff);
 		}
 		
 		return minX;
 	}
 
-	public Long getMaxX(SensorBeacon sensorBeacon, long y) {
+	public Long getMaxX(long y) {
 		Long maxX = null;
 		
-		Coordinate sensor = sensorBeacon.getSensor();
+		Coordinate sensor = getSensor();
 		Long sensorX = sensor.getX();
 		Long sensorY = sensor.getY();
 		
 		Long yDiff = Math.abs(sensorY - y);
-		long manhattanDistance = sensorBeacon.getManhattanDistance();
+		long manhattanDistance = getManhattanDistance();
 		if(yDiff <= manhattanDistance) {
-			maxX = sensorX + (manhattanDistance - Math.abs(sensorY - y));
+			maxX = sensorX + (manhattanDistance - yDiff);
 		}
 		
 		return maxX;
-	}
-
-	public long getMinX(SensorBeacon sensorBeacon) {
-		Coordinate sensor = sensorBeacon.getSensor();
-		Coordinate beacon = sensorBeacon.getBeacon();
-		Long sensorX = sensor.getX();
-		Long sensorY = sensor.getY();
-		Long beaconY = beacon.getY();
-		long manhattanDistance = sensorBeacon.getManhattanDistance();
-		
-		return manhattanDistance - Math.abs(sensorY - beaconY) - sensorX;
-	}
-
-	public long getMaxX(SensorBeacon sensorBeacon) {
-		Coordinate sensor = sensorBeacon.getSensor();
-		Coordinate beacon = sensorBeacon.getBeacon();
-		Long sensorX = sensor.getX();
-		Long sensorY = sensor.getY();
-		Long beaconY = beacon.getY();
-		long manhattanDistance = sensorBeacon.getManhattanDistance();
-		
-		return manhattanDistance - Math.abs(sensorY - beaconY) + sensorX;
 	}
 
 	public Coordinate getSensor() {
