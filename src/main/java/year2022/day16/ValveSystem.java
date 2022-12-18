@@ -14,18 +14,22 @@ public class ValveSystem {
 	private Long totalMinutes;
 	private Long currentMinute;
 	private Valve currentValve;
-	private Set<OpenedValve> openedValves;
+	private Long currentRate;
 	private Set<Valve> valves;
 	private Long totalPressureReleased;
-	private Long valveNonZeroRateCount;
 	
 	public ValveSystem() {
 	}
+	
 
-	public ValveSystem(Long totalMinutes, Long totalPressureReleased, Long valveNonZeroRateCount) {
+	public ValveSystem(Long totalMinutes, Long currentMinute, Valve currentValve, Long currentRate, Set<Valve> valves,
+			Long totalPressureReleased) {
 		this.totalMinutes = totalMinutes;
-		this.totalPressureReleased = 0L;
-		this.valveNonZeroRateCount = valveNonZeroRateCount;
+		this.currentMinute = currentMinute;
+		this.currentValve = currentValve;
+		this.currentRate = currentRate;
+		this.valves = valves;
+		this.totalPressureReleased = totalPressureReleased;
 	}
 
 	@Override
@@ -36,7 +40,8 @@ public class ValveSystem {
 				.append(totalMinutes)
 				.append(currentMinute)
 				.append(currentValve)
-				.append(openedValves)
+				.append(currentRate)
+				.append(valves)
 				.append(totalPressureReleased)
 				.toHashCode();
 	}
@@ -53,7 +58,8 @@ public class ValveSystem {
 				.append(totalMinutes, rhs.totalMinutes)
 				.append(currentMinute, rhs.currentMinute)
 				.append(currentValve, rhs.currentValve)
-				.append(openedValves, rhs.openedValves)
+				.append(currentRate, rhs.currentRate)
+				.append(valves, rhs.valves)
 				.append(totalPressureReleased, rhs.totalPressureReleased)
 				.isEquals();
 	}
@@ -61,29 +67,44 @@ public class ValveSystem {
 	public ValveSystem copyValveSystem() {
 		ValveSystem copy = new ValveSystem();
 		copy.setTotalMinutes(getTotalMinutes());
+		copy.setCurrentMinute(getCurrentMinute());
 		copy.setCurrentValve(getCurrentValve());
-		copy.setOpenedValves(new HashSet<>(getOpenedValves()));
+		copy.setCurrentRate(getCurrentRate());
 		copy.setValves(new HashSet<>(getValves()));
 		copy.setTotalPressureReleased(getTotalPressureReleased());
-		copy.setValveNonZeroRateCount(getValveNonZeroRateCount());
 		return copy;
 	}
-
-	public OpenedValve getOpenedValveByValve(Valve valve) {
-		return getOpenedValves().stream()
-				.filter(ov -> ov.getValve().equals(valve))
-				.findFirst().orElse(null);
+	
+	public void addValve(Valve valve) {
+		getValves().add(valve);
 	}
 
-	public void addOpenedValve(Valve valve) {
-		if(getOpenedValves().stream()
-				.noneMatch(ov -> ov.getValve().equals(valve))
-				) {
-			OpenedValve openedValve = new OpenedValve(currentMinute, valve);
-			openedValve.setValveSystem(this);
-			getOpenedValves().add(openedValve);
-			getValves().add(valve);
-			setTotalPressureReleased(getTotalPressureReleased() + openedValve.getPressureReleased());
+	public void openValve(Valve valve) {
+		setCurrentMinute(getCurrentMinute()+1);
+		setTotalPressureReleased(getTotalPressureReleased() + getCurrentRate());
+		setCurrentRate(getCurrentRate() + valve.getRate());
+		addValve(valve);
+	}
+	
+	public ValveSystem travelToValve(ValveLink valveLink) {
+		ValveSystem newValveSystem = copyValveSystem();
+		for(int i = 1; i < valveLink.getPath().getSize(); i++) {
+			newValveSystem.setCurrentMinute(newValveSystem.getCurrentMinute() + 1);
+			newValveSystem.setTotalPressureReleased(newValveSystem.getTotalPressureReleased() + newValveSystem.getCurrentRate());
+			newValveSystem.setCurrentValve(valveLink.getPath().getValves().get(i));
+			if(newValveSystem.getCurrentMinute().equals(newValveSystem.getTotalMinutes())) {
+				//out of time
+				break;
+			}
+		}
+
+		return newValveSystem;
+	}
+	
+	public void waitUntilEnd() {
+		while( ! getCurrentMinute().equals(getTotalMinutes())) {
+			setCurrentMinute(getCurrentMinute()+1);
+			setTotalPressureReleased(getTotalPressureReleased() + getCurrentRate());			
 		}
 	}
 
@@ -93,17 +114,6 @@ public class ValveSystem {
 
 	public void setTotalMinutes(Long totalMinutes) {
 		this.totalMinutes = totalMinutes;
-	}
-
-	public Set<OpenedValve> getOpenedValves() {
-		if(openedValves == null) {
-			openedValves = new HashSet<>();
-		}
-		return openedValves;
-	}
-
-	public void setOpenedValves(Set<OpenedValve> openedValves) {
-		this.openedValves = openedValves;
 	}
 
 	public Long getTotalPressureReleased() {
@@ -141,12 +151,12 @@ public class ValveSystem {
 		this.valves = valves;
 	}
 
-	public Long getValveNonZeroRateCount() {
-		return valveNonZeroRateCount;
+	public Long getCurrentRate() {
+		return currentRate;
 	}
 
-	public void setValveNonZeroRateCount(Long valveNonZeroRateCount) {
-		this.valveNonZeroRateCount = valveNonZeroRateCount;
+	public void setCurrentRate(Long currentRate) {
+		this.currentRate = currentRate;
 	}
 
 }

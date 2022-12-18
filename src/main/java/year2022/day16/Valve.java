@@ -8,11 +8,15 @@ public class Valve {
 	private String name;
 	private Long rate;
 	private Set<Valve> valves;
+	private Set<ValveLink> valveLinks;
 	
 	public boolean isZeroRate() {
 		return rate.equals(0L);
 	}
 	
+	public void addValveLink(ValveLink valveLink) {
+		getValveLinks().add(valveLink);
+	}
 	public void addValve(Valve valve) {
 		getValves().add(valve);
 	}
@@ -42,6 +46,17 @@ public class Valve {
 
 	public void setValves(Set<Valve> valves) {
 		this.valves = valves;
+	}
+
+	public Set<ValveLink> getValveLinks() {
+		if(valveLinks == null) {
+			valveLinks = new HashSet<>();
+		}
+		return valveLinks;
+	}
+
+	public void setValveLinks(Set<ValveLink> valveLinks) {
+		this.valveLinks = valveLinks;
 	}
 
 }

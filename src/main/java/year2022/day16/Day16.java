@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,10 +17,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import util.ListHelper;
+
 public class Day16 {
 
-	private static final String FILENAME = "src/main/resources/2022/day16InputSample.txt";
-//	private static final String FILENAME = "src/main/resources/2022/day16Input.txt";
+//	private static final String FILENAME = "src/main/resources/2022/day16InputSample.txt";
+	private static final String FILENAME = "src/main/resources/2022/day16Input.txt";
 	
 	public static final String START_VALVE_NAME = "AA";
 	public static final Long TOTAL_MINUTES = 30L;
@@ -29,6 +32,19 @@ public class Day16 {
 	
 	public static void main(String[] args) throws IOException {
 		Set<Valve> valves = readValves();
+		
+		Set<Valve> nonZeroRateValves = valves.stream()
+				.filter(v -> ! v.isZeroRate())
+				.collect(Collectors.toSet());
+		for(Valve valve : valves) {
+			Set<Valve> otherNonZeroRateValves = nonZeroRateValves.stream()
+					.filter(v -> ! valve.equals(v))
+					.collect(Collectors.toSet());
+			for(Valve otherNonZeroRateValve : otherNonZeroRateValves) {
+				Path path = findShortestPath(valve, otherNonZeroRateValve);
+				valve.addValveLink(new ValveLink(path, otherNonZeroRateValve));
+			}
+		}
 		
 		valves.forEach(t -> System.out.println(ReflectionToStringBuilder.toString(t, ToStringStyle.MULTI_LINE_STYLE)));
 //		for(Valve valve : valves) {
@@ -41,13 +57,16 @@ public class Day16 {
 		
 		Long startMinute = 0L;
 		Valve startValve = findValveByName(valves, START_VALVE_NAME);
-		long nonZeroRateCount = valves.stream()
-				.filter(v -> ! v.isZeroRate())
-				.count();
+
 		
-		ValveSystem valveSystem = new ValveSystem(TOTAL_MINUTES, 0L, nonZeroRateCount);
-		valveSystem.setCurrentMinute(startMinute);
-		valveSystem.setCurrentValve(startValve);
+		ValveSystem valveSystem = new ValveSystem(
+				TOTAL_MINUTES,
+				startMinute,
+				startValve,
+				0L,
+				new HashSet<>(),
+				0L
+				);
 
 		TreeSet<ValveSystem> optimalValveSystems = new TreeSet<>(ValveSystem.TOTAL_PRESSURE_RELEASED_COMPARATOR.reversed());
 		Set<ValveSystem> processed = new HashSet<>();
@@ -56,68 +75,88 @@ public class Day16 {
 	
 		ValveSystem optimalValveSystem = optimalValveSystems.first();
 		
-		optimalValveSystem.getOpenedValves().forEach(ov -> {
-			System.out.println(ov.getValve().getName() + " / " + ov.getMinutedOpened() + " / " + ov.getPressureReleased());
-		});
+//		optimalValveSystem.getValves().forEach(ov -> {
+//			System.out.println(v.getName() + " / " + o.getMinutedOpened() + " / " + ov.getPressureReleased());
+//		});
 		
 		System.out.println(optimalValveSystem.getTotalPressureReleased());
-		
-		
 	}
 	
-	private static void recurse(ValveSystem valveSystem, TreeSet<ValveSystem> optimalValveSystems, Set<ValveSystem> processed) {
-//		valveSystem.getOpenedValves().stream()
-//				.forEach(ov -> {
-//					System.out.print(ov.getValve().getName() + " / " + ov.getMinutedOpened() + " / " + ov.getPressureReleased());
-//					System.out.println();
-//				});
-//		System.out.println("#######################");
+	private static Path findShortestPath(Valve startValve, Valve endValve) {
+		Path shortestPath = null;
 		
-		if(processed.stream()
-				.filter(p -> p.getValves().equals(valveSystem.getValves()))
-				.filter(p -> p.getCurrentValve().equals(valveSystem.getCurrentValve()))
-				.filter(p -> p.getTotalPressureReleased() >= valveSystem.getTotalPressureReleased())
-				.filter(p -> p.getCurrentMinute() <= valveSystem.getCurrentMinute())
-				.collect(Collectors.toSet()).isEmpty()
-				) {
+		Set<Valve> visited = new HashSet<>();
+
+		LinkedList<Path> queue = new LinkedList<>();
+
+		Path startPath = new Path();
+		startPath.addValve(startValve);
+
+		visited.add(startValve);
+		queue.add(startPath);
+		while ( ! queue.isEmpty()) {
+			Path path = queue.poll();
+			
+			List<Valve> valves = path.getValves();
+			
+			Valve valve = ListHelper.getLast(valves); 
+			if(valve.equals(endValve)) {
+				shortestPath = path;
+			} else {
+				for(Valve unvisitedValve : getUnvisitedValves(valve, visited)) {
+					Path copyPath = path.copyPath();
+					copyPath.addValve(unvisitedValve);
+					
+					visited.add(unvisitedValve);
+					queue.add(copyPath);
+				}
+			}
+		}
+		
+		return shortestPath;
+	}
+
+	
+	private static Set<Valve> getUnvisitedValves(Valve valve, Set<Valve> visited) {
+		return valve.getValves().stream()
+				.filter(v -> ! visited.contains(v))
+				.collect(Collectors.toSet());
+	}
+
+	private static void recurse(ValveSystem valveSystem, TreeSet<ValveSystem> optimalValveSystems, Set<ValveSystem> processed) {
+		if( ! processed.contains(valveSystem)) {
 			Long currentMinute = valveSystem.getCurrentMinute();
 			Valve currentValve = valveSystem.getCurrentValve();
+			
 			if(currentMinute.compareTo(valveSystem.getTotalMinutes()) >= 0
-					|| valveSystem.getOpenedValves().size() == valveSystem.getValveNonZeroRateCount()
 					) {
 				addEntry(optimalValveSystems, valveSystem);
-			} else {
-//				System.out.println("Minute: " + currentMinute);
-//				System.out.println("Currently at " + currentValve.getName());
+			} else {				
+				Set<ValveLink> unopenedValveLinks = currentValve.getValveLinks().stream()
+						.filter(vl ->  ! valveSystem.getValves().contains(vl.getValve()))
+						.collect(Collectors.toSet());
+				
 				if( ! currentValve.isZeroRate()
-						&& valveSystem.getOpenedValveByValve(currentValve) == null
+						&& ! valveSystem.getValves().contains(currentValve)
 						) {
-//					System.out.println("Minute: " + currentMinute);
-//					System.out.println("Opening " + currentValve.getName());
-					Long newMinute = currentMinute + OPEN_VALVE_TIME;
-					ValveSystem newValveSystem = valveSystem.copyValveSystem();
-					newValveSystem.setCurrentMinute(newMinute);
-					newValveSystem.addOpenedValve(currentValve);
-					recurse(newValveSystem, optimalValveSystems, processed);
-				}
-
-				for(Valve linkedValve : currentValve.getValves()) {
-//					System.out.println("Minute: " + currentMinute);
-//					System.out.println("Travelling from " + currentValve.getName() + " to " + linkedValve.getName());
-					Long newMinute = currentMinute + TRAVEL_TIME;
-					ValveSystem newValveSystem = valveSystem.copyValveSystem();
-					newValveSystem.setCurrentMinute(newMinute);
-					newValveSystem.setCurrentValve(linkedValve);
-					
-					recurse(newValveSystem, optimalValveSystems, processed);
+					valveSystem.openValve(currentValve);
+					recurse(valveSystem, optimalValveSystems, processed);
+				} else if(unopenedValveLinks.isEmpty()
+						&& valveSystem.getValves().contains(currentValve)
+						) {
+					valveSystem.waitUntilEnd();
+					recurse(valveSystem, optimalValveSystems, processed);
+				} else {
+					for(ValveLink valveLink : unopenedValveLinks) {
+						ValveSystem newValveSystem = valveSystem.travelToValve(valveLink);
+						recurse(newValveSystem, optimalValveSystems, processed);
+					}					
 				}
 			}
 			
-			processed.add(valveSystem);
+			processed.add(valveSystem);	
 		}
-		
 	}
-	
 
 	private static void addEntry(TreeSet<ValveSystem> optimalValveSystems, ValveSystem valveSystem) {
 //		valveSystem.getOpenedValves().stream()
