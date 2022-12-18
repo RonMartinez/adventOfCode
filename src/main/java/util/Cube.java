@@ -3,21 +3,24 @@ package util;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Coordinate {
+public class Cube {
 
 	private Long x;
 	private Long y;
+	private Long z;
 
-	public Coordinate(Long x, Long y) {
+	public Cube(Long x, Long y, Long z) {
 		this.x = x;
 		this.y = y;
+		this.z = z;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder()
 				.append(x)
 				.append(y)
+				.append(z)
 				.toHashCode();
 	}
 
@@ -28,10 +31,11 @@ public class Coordinate {
 		if (obj.getClass() != getClass()) {
 			return false;
 		}
-		Coordinate rhs = (Coordinate) obj;
+		Cube rhs = (Cube) obj;
 		return new EqualsBuilder()
 				.append(x, rhs.x)
 				.append(y, rhs.y)
+				.append(z, rhs.z)
 				.isEquals();
 	}
 
@@ -49,6 +53,14 @@ public class Coordinate {
 
 	public void setY(Long y) {
 		this.y = y;
+	}
+
+	public Long getZ() {
+		return z;
+	}
+
+	public void setZ(Long z) {
+		this.z = z;
 	}
 
 }
