@@ -2,6 +2,7 @@ package util;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Cube {
 
@@ -15,6 +16,15 @@ public class Cube {
 		this.z = z;
 	}
 	
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append(x)
+				.append(y)
+				.append(z)
+				.toString();
+	}
+
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder()

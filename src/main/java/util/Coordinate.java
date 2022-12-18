@@ -2,6 +2,7 @@ package util;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Coordinate {
 
@@ -11,6 +12,14 @@ public class Coordinate {
 	public Coordinate(Long x, Long y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append(x)
+				.append(y)
+				.toString();
 	}
 
 	@Override
