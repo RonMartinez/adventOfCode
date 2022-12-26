@@ -1,4 +1,4 @@
-package year2022.day16;
+package year2022.day16newAttempt;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -17,23 +17,27 @@ public class ValveSystem {
 	private Long currentRate;
 	private Set<Valve> valves;
 	private Long totalPressureReleased;
+	private Long playersRemaining;
 	
 	public ValveSystem() {
 	}
 	
 
 	public ValveSystem(Long totalMinutes, Long currentMinute, Valve currentValve, Long currentRate, Set<Valve> valves,
-			Long totalPressureReleased) {
+			Long totalPressureReleased, Long playersRemaining) {
 		this.totalMinutes = totalMinutes;
 		this.currentMinute = currentMinute;
 		this.currentValve = currentValve;
 		this.currentRate = currentRate;
 		this.valves = valves;
 		this.totalPressureReleased = totalPressureReleased;
+		this.playersRemaining = playersRemaining;
 	}
 
 	@Override
 	public int hashCode() {
+		// you pick a hard-coded, randomly chosen, non-zero, odd number
+		// ideally different for each class
 		return new HashCodeBuilder()
 				.append(totalMinutes)
 				.append(currentMinute)
@@ -41,6 +45,7 @@ public class ValveSystem {
 				.append(currentRate)
 				.append(valves)
 				.append(totalPressureReleased)
+				.append(playersRemaining)
 				.toHashCode();
 	}
 
@@ -59,6 +64,7 @@ public class ValveSystem {
 				.append(currentRate, rhs.currentRate)
 				.append(valves, rhs.valves)
 				.append(totalPressureReleased, rhs.totalPressureReleased)
+				.append(playersRemaining, rhs.playersRemaining)
 				.isEquals();
 	}
 
@@ -70,6 +76,7 @@ public class ValveSystem {
 		copy.setCurrentRate(getCurrentRate());
 		copy.setValves(new HashSet<>(getValves()));
 		copy.setTotalPressureReleased(getTotalPressureReleased());
+		copy.setPlayersRemaining(getPlayersRemaining());
 		return copy;
 	}
 	
@@ -155,6 +162,16 @@ public class ValveSystem {
 
 	public void setCurrentRate(Long currentRate) {
 		this.currentRate = currentRate;
+	}
+
+
+	public Long getPlayersRemaining() {
+		return playersRemaining;
+	}
+
+
+	public void setPlayersRemaining(Long playersRemaining) {
+		this.playersRemaining = playersRemaining;
 	}
 
 }

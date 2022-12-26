@@ -47,13 +47,6 @@ public class Day16 {
 		}
 		
 		valves.forEach(t -> System.out.println(ReflectionToStringBuilder.toString(t, ToStringStyle.MULTI_LINE_STYLE)));
-//		for(Valve valve : valves) {
-//			System.out.println(valve.getName());
-//			System.out.println(valve.getRate());
-//			System.out.println(valve.getValves().stream()
-//					.map(Valve::getName)
-//					.collect(Collectors.joining(",")));
-//		}
 		
 		Long startMinute = 0L;
 		Valve startValve = findValveByName(valves, START_VALVE_NAME);
@@ -74,10 +67,6 @@ public class Day16 {
 		recurse(valveSystem, optimalValveSystems, processed);
 	
 		ValveSystem optimalValveSystem = optimalValveSystems.first();
-		
-//		optimalValveSystem.getValves().forEach(ov -> {
-//			System.out.println(v.getName() + " / " + o.getMinutedOpened() + " / " + ov.getPressureReleased());
-//		});
 		
 		System.out.println(optimalValveSystem.getTotalPressureReleased());
 	}
