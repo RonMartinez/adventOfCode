@@ -79,7 +79,17 @@ public class ValveSystem {
 		copy.setPlayersRemaining(getPlayersRemaining());
 		return copy;
 	}
-	
+
+	public void applyValues(ValveSystem copy) {
+		setTotalMinutes(copy.getTotalMinutes());
+		setCurrentMinute(copy.getCurrentMinute());
+		setCurrentValve(copy.getCurrentValve());
+		setCurrentRate(copy.getCurrentRate());
+		setValves(new HashSet<>(copy.getValves()));
+		setTotalPressureReleased(copy.getTotalPressureReleased());
+		setPlayersRemaining(copy.getPlayersRemaining());
+	}
+
 	public void addValve(Valve valve) {
 		getValves().add(valve);
 	}
@@ -105,7 +115,19 @@ public class ValveSystem {
 
 		return newValveSystem;
 	}
-	
+
+	public void travelToValve2(ValveLink valveLink) {
+		for(int i = 1; i < valveLink.getPath().getSize(); i++) {
+			setCurrentMinute(getCurrentMinute() + 1);
+			setTotalPressureReleased(getTotalPressureReleased() + getCurrentRate());
+			setCurrentValve(valveLink.getPath().getValves().get(i));
+			if(getCurrentMinute().equals(getTotalMinutes())) {
+				//out of time
+				break;
+			}
+		}
+	}
+
 	public void waitUntilEnd() {
 		while( ! getCurrentMinute().equals(getTotalMinutes())) {
 			setCurrentMinute(getCurrentMinute()+1);

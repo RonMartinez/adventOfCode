@@ -21,8 +21,8 @@ import util.ListHelper;
 
 public class Day16 {
 
-	private static final String FILENAME = "src/main/resources/2022/day16InputSample.txt";
-//	private static final String FILENAME = "src/main/resources/2022/day16Input.txt";
+//	private static final String FILENAME = "src/main/resources/2022/day16InputSample.txt";
+	private static final String FILENAME = "src/main/resources/2022/day16Input.txt";
 	
 	public static final String START_VALVE_NAME = "AA";
 	public static final Long TOTAL_MINUTES = 26L;
@@ -32,6 +32,7 @@ public class Day16 {
 	public static final Long NUMBER_OF_PLAYERS = 2L;
 	
 	private static Valve startValve;
+	private static int nonZeroRateValveCount;
 	
 	public static void main(String[] args) throws IOException {
 		Set<Valve> valves = readValves();
@@ -39,6 +40,7 @@ public class Day16 {
 		Set<Valve> nonZeroRateValves = valves.stream()
 				.filter(v -> ! v.isZeroRate())
 				.collect(Collectors.toSet());
+		nonZeroRateValveCount = nonZeroRateValves.size();
 		for(Valve valve : valves) {
 			Set<Valve> otherNonZeroRateValves = nonZeroRateValves.stream()
 					.filter(v -> ! valve.equals(v))
@@ -48,12 +50,42 @@ public class Day16 {
 				valve.addValveLink(new ValveLink(path, otherNonZeroRateValve));
 			}
 		}
-		
+
+
 		valves.forEach(t -> System.out.println(ReflectionToStringBuilder.toString(t, ToStringStyle.MULTI_LINE_STYLE)));
 		
 		Long startMinute = 0L;
 		startValve = findValveByName(valves, START_VALVE_NAME);
 
+//		Set<ValveLink> valveLinksToRemove = new HashSet<>();
+//		for(ValveLink valveLink : startValve.getValveLinks()) {
+//			System.out.println(valveLink.getValve().getName());
+//			System.out.println(valveLink.getPath().getSize());
+//			List<Valve> pathValves = valveLink.getPath().getValves();
+//			for(int i = 1; i < pathValves.size() - 1; i++) {
+//				if( ! pathValves.get(i).isZeroRate()) {
+//					valveLinksToRemove.add(valveLink);
+//					break;
+//				}
+//			}
+//		}
+//		startValve.getValveLinks().removeAll(valveLinksToRemove);
+//
+//		for(Valve valve : nonZeroRateValves) {
+//			valveLinksToRemove = new HashSet<>();
+//			for(ValveLink valveLink : valve.getValveLinks()) {
+//				System.out.println(valveLink.getValve());
+//				System.out.println(valveLink.getPath().getSize());
+//				List<Valve> pathValves = valveLink.getPath().getValves();
+//				for(int i = 1; i < pathValves.size() - 1; i++) {
+//					if( ! pathValves.get(i).isZeroRate()) {
+//						valveLinksToRemove.add(valveLink);
+//						break;
+//					}
+//				}
+//			}
+//			valve.getValveLinks().removeAll(valveLinksToRemove);
+//		}
 		
 		ValveSystem valveSystem = new ValveSystem(
 				TOTAL_MINUTES,
@@ -66,7 +98,7 @@ public class Day16 {
 				);
 
 		TreeSet<ValveSystem> optimalValveSystems = new TreeSet<>(ValveSystem.TOTAL_PRESSURE_RELEASED_COMPARATOR.reversed());
-		Set<ValveSystem> processed = new HashSet<>();
+		Set<Integer> processed = new HashSet<>();
 		
 		recurse(valveSystem, optimalValveSystems, processed);	
 		
@@ -117,22 +149,23 @@ public class Day16 {
 				.collect(Collectors.toSet());
 	}
 
-	private static void recurse(ValveSystem valveSystem, TreeSet<ValveSystem> optimalValveSystems, Set<ValveSystem> processed) {
-		if( ! processed.contains(valveSystem)) {
+	private static void recurse(ValveSystem valveSystem, TreeSet<ValveSystem> optimalValveSystems, Set<Integer> processed) {
+		if( ! processed.contains(valveSystem.hashCode())) {
+			ValveSystem original = valveSystem.copyValveSystem();
 			Long currentMinute = valveSystem.getCurrentMinute();
 			Valve currentValve = valveSystem.getCurrentValve();
 			
 			if(currentMinute.compareTo(valveSystem.getTotalMinutes()) >= 0
 					) {
 				if(valveSystem.getPlayersRemaining().compareTo(0L) > 0) {
-					ValveSystem copy = valveSystem.copyValveSystem();
-					copy.setCurrentMinute(0L);
-					copy.setCurrentRate(0L);
-					copy.setCurrentValve(startValve);
-					copy.setPlayersRemaining(copy.getPlayersRemaining() - 1L);
-					System.out.println("passing to next player: " + copy.getValves().stream().map(Valve::getName).collect(Collectors.joining("/")));
+					valveSystem.setCurrentMinute(0L);
+					valveSystem.setCurrentRate(0L);
+					valveSystem.setCurrentValve(startValve);
+					valveSystem.setPlayersRemaining(valveSystem.getPlayersRemaining() - 1L);
+//					System.out.println("passing to next player: " + copy.getValves().stream().map(Valve::getName).collect(Collectors.joining("/")));
 					
-					recurse(copy, optimalValveSystems, processed);
+					recurse(valveSystem, optimalValveSystems, processed);
+//					valveSystem.applyValues(original);
 				} else {
 					addEntry(optimalValveSystems, valveSystem);	
 				}
@@ -140,33 +173,54 @@ public class Day16 {
 				Set<ValveLink> unopenedValveLinks = currentValve.getValveLinks().stream()
 						.filter(vl ->  ! valveSystem.getValves().contains(vl.getValve()))
 						.collect(Collectors.toSet());
-				unopenedValveLinks.add(null);
+				if(valveSystem.getPlayersRemaining() > 0L
+						&& valveSystem.getValves().size() >= (nonZeroRateValveCount / 2)
+						) {
+					unopenedValveLinks.clear();
+//					unopenedValveLinks.add(null);	
+				}
+				
+//				if(valveSystem.getPlayersRemaining() > 0L
+//						&& valveSystem.getValves().size() >= (nonZeroRateValveCount / 3 * 2)
+//						) {
+//					unopenedValveLinks.clear();
+//					unopenedValveLinks.add(null);
+//				}
 				
 				if( ! currentValve.isZeroRate()
 						&& ! valveSystem.getValves().contains(currentValve)
 						) {
 					valveSystem.openValve(currentValve);
 					recurse(valveSystem, optimalValveSystems, processed);
+//					valveSystem.applyValues(original);
 				} else if(unopenedValveLinks.isEmpty()
 						) {
 					valveSystem.waitUntilEnd();
 					recurse(valveSystem, optimalValveSystems, processed);
+//					valveSystem.applyValues(original);
 				} else {
 					for(ValveLink valveLink : unopenedValveLinks) {
 						if(valveLink == null) {
-							ValveSystem newValveSystem = valveSystem.copyValveSystem();
-							newValveSystem.waitUntilEnd();
-							recurse(newValveSystem, optimalValveSystems, processed);
+							valveSystem.waitUntilEnd();
+							recurse(valveSystem, optimalValveSystems, processed);
 						} else {
-							ValveSystem newValveSystem = valveSystem.travelToValve(valveLink);
-							recurse(newValveSystem, optimalValveSystems, processed);
+							valveSystem.travelToValve2(valveLink);
+							recurse(valveSystem, optimalValveSystems, processed);
 						}
+						valveSystem.applyValues(original);
 					}					
 				}
 			}
-			
-			processed.add(valveSystem);
-			System.out.println(processed.size());
+
+			valveSystem.applyValues(original);
+			if( ! (valveSystem.getPlayersRemaining() == 0L
+					&& valveSystem.getCurrentMinute().equals(valveSystem.getTotalMinutes()))
+					) {
+				processed.add(valveSystem.hashCode());
+			}
+//			System.out.println(processed.size());
+		} else {
+//			System.out.println("skipping");
 		}
 	}
 
@@ -178,7 +232,7 @@ public class Day16 {
 //				});
 //		System.out.println(valveSystem.getTotalPressureReleased());
 		
-		optimalValveSystems.add(valveSystem);
+		optimalValveSystems.add(valveSystem.copyValveSystem());
 		if(optimalValveSystems.size() > MAX_OPTIMAL_VALVE_SYSTEMS_SIZE) {
 			optimalValveSystems.pollLast();
 		}
