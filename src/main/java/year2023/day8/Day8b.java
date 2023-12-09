@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 
+import util.MathHelper;
+
 public class Day8b {
 
 //	private static final String FILENAME = "src/main/resources/2023/day8InputSample.txt";
@@ -64,13 +66,14 @@ public class Day8b {
 					i = 0;
 				}
 			}
-			System.out.println("\tcurrentElement: " + currentElement.getName() + ", steps: " + steps);
+			System.out.println("endingElement: " + currentElement.getName());
+			System.out.println("steps: " + steps);
 			stepCountMap.put(currentElement, steps);
 		}
 		
 		Long lcm = 1L;
 		for(Long stepCount : stepCountMap.values()) {
-			lcm = lcm(lcm, stepCount);
+			lcm = MathHelper.lcm(lcm, stepCount);
 		}
 		
 		System.out.println(lcm);
@@ -78,20 +81,6 @@ public class Day8b {
 		System.out.println("done");
 	}
 	
-	private static long gcd(long a, long b) {
-		while (b > 0) {
-			long temp = b;
-			b = a % b; // % is remainder
-			a = temp;
-		}
-		return a;
-	}
-
-	private static long lcm(long a, long b) {
-		return a * (b / gcd(a, b));
-	}
-
-
 	private static boolean currentElementsAreAtNodesThatEndInZ(Set<Element> currentElements) {
 		return currentElements.stream()
 				.allMatch(e -> e.getName().charAt(2) == 'Z');
